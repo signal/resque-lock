@@ -45,7 +45,7 @@ module Resque
       # passed the same arguments as `perform`, that is, your job's
       # payload.
       def lock(*args)
-        "lock:#{name}-#{args.to_s}"
+        "lock:#{name}-#{args.join('-')}"
       end
 
       def before_enqueue_lock(*args)
