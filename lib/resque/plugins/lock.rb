@@ -41,8 +41,6 @@ module Resque
     # repo_id. Normally a job is locked using a combination of its
     # class name and arguments.
     module Lock
-      class EnqueueFailureError < StandardError; end
-
       # Override in your job to control the lock key. It is
       # passed the same arguments as `perform`, that is, your job's
       # payload.
@@ -51,12 +49,7 @@ module Resque
       end
 
       def before_enqueue_lock(*args)
-        lock_key = lock(*args)
-        unless success = Resque.redis.setnx(lock_key, Time.now)
-          lock_timestamp = Resque.redis.get(lock_key)
-          handle_enqueue_failure(lock_key, lock_timestamp)
-        end
-        success
+        Resque.redis.setnx(lock(*args), true)
       end
 
       def around_perform_lock(*args)
@@ -73,9 +66,6 @@ module Resque
         Resque.redis.del(lock(*args))
       end
 
-      # Override in your job to do something on enqueue failure
-      def handle_enqueue_failure(lock_key, lock_timestamp)
-      end
     end
   end
 end
