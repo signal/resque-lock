@@ -41,8 +41,6 @@ module Resque
     # repo_id. Normally a job is locked using a combination of its
     # class name and arguments.
     module Lock
-      class EnqueueFailureError < StandardError; end
-
       # Override in your job to control the lock key. It is
       # passed the same arguments as `perform`, that is, your job's
       # payload.

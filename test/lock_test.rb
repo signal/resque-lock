@@ -22,7 +22,7 @@ class LockTest < Test::Unit::TestCase
       @@error
     end
 
-    def self.handle_enqueue_failure
+    def self.handle_enqueue_failure(lock_key, lock_timestamp)
       raise @@error
     end
   end
@@ -48,18 +48,10 @@ class LockTest < Test::Unit::TestCase
 
   def test_lock
     assert_equal 0, Resque.redis.llen('queue:lock_test')
-    failure_count = 0
 
-    3.times do
-      begin
-        Resque.enqueue(Job)
-      rescue Resque::Plugins::Lock::EnqueueFailureError
-        failure_count += 1
-      end
-    end
+    3.times { Resque.enqueue(Job) }
 
     assert_equal 1, Resque.redis.llen('queue:lock_test')
-    assert_equal 2, failure_count
   end
 
   def test_handle_enqueue_failure
